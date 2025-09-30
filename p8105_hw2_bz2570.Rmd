@@ -1,0 +1,21 @@
+---
+title: "p8105_hw2_bz2570"
+author: "Boran Zhai"
+date: "2025-09-30"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readr)
+```
+
+### Problem 1
+
+Import dataset(nemployment.csv, and snp.csv.)
+```{r}
+library(readr)
+pols_month <- read_csv("Data/pols-month.csv")
+unemployment <- read_csv("Data/unemployment.csv")
+snp <- read_csv("Data/snp.csv")
+```
