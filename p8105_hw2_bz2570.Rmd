@@ -14,8 +14,30 @@ library(readr)
 
 Import dataset(nemployment.csv, and snp.csv.)
 ```{r}
-library(readr)
-pols_month <- read_csv("Data/pols-month.csv")
-unemployment <- read_csv("Data/unemployment.csv")
-snp <- read_csv("Data/snp.csv")
+pols_month <- read_csv("./data/pols-month.csv")
+unemployment <- read_csv("./data/unemployment.csv")
+snp <- read_csv("./data/snp.csv")
 ```
+
+(1)Clean the data in pols-month.csv. Use separate() to break up the variable mon into integer variables year, month, and day; replace month number with month name; create a president variable taking values gop and dem, and remove prez_dem and prez_gop; and remove the day variable.
+```{r}
+pols_month <- read_csv("./data/pols-month.csv") |> 
+  janitor::clean_names() |>
+  separate(mon, into = c("year", "month", "day"), sep = "-") |>
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day),
+    month = month.abb[month],
+    president = ifelse(prez_gop == 1, "gop", 
+                       ifelse(prez_dem == 1, "dem",NA))
+  ) |>
+  select(-prez_dem, -prez_gop, -day)
+pols_month
+```
+
+(2)Clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
+```{r}
+
+```
+
