@@ -8,14 +8,10 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(readr)
+library(lubridate)
 ```
 
 ### Problem 1
-
-Import dataset(nemployment.csv, and snp.csv.)
-```{r}
-unemployment <- read_csv("./data/unemployment.csv")
-```
 
 (1) Clean the data in pols-month.csv. Use separate() to break up the variable mon into integer variables year, month, and day; replace month number with month name; create a president variable taking values gop and dem, and remove prez_dem and prez_gop; and remove the day variable.
 ```{r}
@@ -62,8 +58,26 @@ unemployment_tidy <- read_csv("./data/unemployment.csv") |>
   mutate(
     unemployment_rate = as.numeric(unemployment_rate)
   ) |>
-  rename(year = Year) |>
-  filter(!is.na(unemployment_rate))
+  rename(year = Year)
 unemployment_tidy 
 ```
 
+(4) Join the datasets by merging snp into pols, and merging unemployment into the result.
+```{r}
+data_0 <- pols_month |>
+  left_join(snp, by = c("year", "month")) |>
+  left_join(unemployment_tidy, by = c("year", "month")) |>
+  arrange(year, match(month, month.abb))
+data_0
+```
+
+Note(useing date variable)
+```{r}
+data_1 <- pols_month |>
+  left_join(snp, by = c("year", "month")) |>
+  left_join(unemployment_tidy, by = c("year", "month")) |>
+  arrange(year, match(month, month.abb)) |> 
+  mutate(date = str_c(year, "-", sprintf("%02d", match(month, month.abb))))
+data_1
+```
+Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
