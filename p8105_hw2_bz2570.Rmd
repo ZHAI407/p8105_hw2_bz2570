@@ -111,7 +111,6 @@ mr_tidy <- read_excel("./data/202509 Trash Wheel Collection Data.xlsx",
     sports_balls = as.integer(round(sports_balls)), 
     year = as.integer(year)
   )
-
 ```
 
 Read and clean Professor Trash Wheel data
@@ -125,7 +124,6 @@ professor_tidy <- read_excel("./data/202509 Trash Wheel Collection Data.xlsx",
   mutate(
     year = as.integer(year)
   )
-professor_tidy
 ```
 
 Read and clean Gwynnda data
@@ -139,7 +137,6 @@ gwynnda_tidy <- read_excel("./data/202509 Trash Wheel Collection Data.xlsx",
   mutate(
     year = as.integer(year)
   )
-gwynnda_tidy
 ```
 
 Add an additional variable to both datasets before combining
@@ -150,7 +147,6 @@ professor_tidy <- professor_tidy |>
   mutate(trash_wheel = "Professor Trash Wheel")
 gwynnda_tidy <- gwynnda_tidy |> 
   mutate(trash_wheel = "Gwynnda")
-mr_tidy
 ```
 
 #### Combine datasets
@@ -175,7 +171,6 @@ zip_codes_tidy <- read_csv("./data/Zip Codes.csv",
   janitor::clean_names()|>  
   relocate(zip_code) |> 
   arrange(zip_code)
-zip_codes_tidy
 ```
 
 Import and clean ZIP ZORI dataset
@@ -196,7 +191,6 @@ zip_zori_tidy <- zip_zori |>
     ) |>  
   relocate(region_name) |> 
   arrange(region_name)
-zip_zori_tidy
 ```
 
 #### Merge
