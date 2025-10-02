@@ -166,3 +166,72 @@ combined_trash
 
 #### Write a paragraph about these data
 The resulting dataset combines trash collection data from three separate devices operating in Baltimore's Inner Harbor: Mr. Trash Wheel, Professor Trash Wheel, and Gwynns Falls Trash Wheel. The resulting dataset contains `r nrow(combined_trash)` observations tracking waste collection with `r ncol(combined_trash)` variables. Key variables include dumpster identification numbers, collection dates, total weight of trash, the number of some specific waste categories such as plastic bottles, polystyrene, cigarette butts, and the trash wheel identifier to track the source device.<br>(All the variables are:`r paste(names(combined_trash), collapse = ", ")`).<br> Based on the available data, the total weight of trash collected by Professor Trash Wheel is `r combined_trash |> filter(trash_wheel == "Professor Trash Wheel") |> summarise(total = sum(weight_tons, na.rm = TRUE)) |> pull(total)` tons. During June 2022, Gwynnda collected `r combined_trash |> filter(trash_wheel == "Gwynnda", year == 2022, month == "June") |> summarise(total = sum(cigarette_butts, na.rm = TRUE)) |> pull(total)` cigarette butts.
+
+
+## Problem 3
+Import and clean ZIP code dataset
+```{r}
+zip_codes_tidy <- read_csv("./data/Zip Codes.csv",
+                           na = c(".", "NA", ""))|>
+  janitor::clean_names()|>  
+  relocate(zip_code) |> 
+  arrange(zip_code)
+zip_codes_tidy
+```
+
+Import and clean ZIP ZORI dataset
+```{r}
+zip_zori <- read_csv("./data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",
+                     na = c(".", "NA", "")) |>
+  janitor::clean_names()
+
+zip_zori_tidy <- zip_zori |> 
+  pivot_longer(
+  cols = starts_with("x20"),
+  names_to = "date",        
+  values_to = "zori"        
+  ) |>
+  mutate(
+    date = str_remove(date, "^x"),
+    date = str_replace(date,"-","_")
+    ) |>  
+  relocate(region_name) |> 
+  arrange(region_name)
+zip_zori_tidy
+```
+
+Merge to create a single, final dataset
+```{r}
+resulting_tidy_data <- zip_zori_tidy |>
+  left_join(zip_codes_tidy, by = c("region_name" = "zip_code")) |> 
+  select(
+    region_name, region_id, size_rank, region_type, 
+    state_name, state, city, metro,county, county_name, 
+    date, zori, county_code, county_fips, state_fips, file_date,neighborhood
+  )
+resulting_tidy_data
+```
+
+Check for completeness
+```{r}
+missing_zips <- zip_codes_tidy |>
+  anti_join(zip_zori_tidy, by = c("zip_code" = "region_name")) |>
+  select(zip_code, county, neighborhood)
+```
+
+#### Briefly describe the resulting tidy dataset. 
+1.How many total observations exist? How many unique ZIP codes are included, and how many unique neighborhoods?<br>
+
+The resulting tidy dataset contains `r nrow(resulting_tidy_data)` observations with `r ncol(resulting_tidy_data)` variables. The dataset spans from `r min(resulting_tidy_data$date)` to `r max(resulting_tidy_data$date)`, providing a comprehensive time series of Zillow rental price. All the variables in this dataset are: `r paste(names(combined_trash), collapse = ", ")`. <br>
+
+Besides, the dataset includes `r n_distinct(resulting_tidy_data$region_name)` unique ZIP codes and `r n_distinct(na.omit(resulting_tidy_data$neighborhood))` unique neighborhoods across New York City. The structure also reveals that `r n_distinct(resulting_tidy_data$county)` distinct counties represented in the dataset. <br>
+
+
+2.Which ZIP codes appear in the ZIP code dataset but not in the Zillow Rental Price dataset? Using a few illustrative examples discuss why these ZIP codes might be excluded from the Zillow dataset.
+
+There are `r nrow(missing_zips)` ZIP codes that appear in the ZIP code dataset but not in the Zillow Rental Price dataset. Examples include `r paste(tail(missing_zips$zip_code, 3), collapse = ", ")`.The details of these three examples are following:<br>
+-`r as.character(missing_zips$zip_code[169])` is located in `r as.character(missing_zips$county[169])`, specifically in the `r as.character(missing_zips$neighborhood[169])` neighborhood.<br>
+-`r as.character(missing_zips$zip_code[170])` is located in `r as.character(missing_zips$county[170])`, specifically in the`r as.character(missing_zips$neighborhood[170])` neighborhood.<br>
+-`r as.character(missing_zips$zip_code[171])` is located in `r as.character(missing_zips$county[171])`, specifically in the`r as.character(missing_zips$neighborhood[171])` neighborhood.<br>
+
+These three examples located in the Rockaways area of Queens are likely excluded from the Zillow dataset. This exclusion is probably due to the following two reasons: firstly, their relatively remote location and lower population density lead to insufficient year-round rental transaction data, which does not meet Zillow's thresholds for inclusion in the dataset; secondly, the area may have a larger share of commercial or recreational area rather than residential areas, resulting in limited residential rental data.
