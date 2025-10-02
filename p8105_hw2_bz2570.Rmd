@@ -235,3 +235,55 @@ There are `r nrow(missing_zips)` ZIP codes that appear in the ZIP code dataset b
 -`r as.character(missing_zips$zip_code[171])` is located in `r as.character(missing_zips$county[171])`, specifically in the`r as.character(missing_zips$neighborhood[171])` neighborhood.<br>
 
 These three examples located in the Rockaways area of Queens are likely excluded from the Zillow dataset. This exclusion is probably due to the following two reasons: firstly, their relatively remote location and lower population density lead to insufficient year-round rental transaction data, which does not meet Zillow's thresholds for inclusion in the dataset; secondly, the area may have a larger share of commercial or recreational area rather than residential areas, resulting in limited residential rental data.
+
+#### Make a table and comment
+For all available ZIP codes, compare rental prices in January 2021 to prices in January 2020. Make a table that shows the 10 ZIP codes (along with the borough and neighborhood) with largest drop in price from January 2020 to 2021. 
+
+```{r}
+covid_rental <- resulting_tidy_data |>
+  filter(
+    (date == "2020_01_31" | date == "2021_01_31")
+  ) |>
+  select(region_name, county, neighborhood, date, zori) |>
+  pivot_wider(
+    names_from = date,
+    values_from = zori
+  ) |>
+  mutate(
+    price_change = `2021_01_31` - `2020_01_31`,
+    price_change_pct = (`2021_01_31` - `2020_01_31`) / `2020_01_31` * 100
+  ) |>
+  filter(!is.na(price_change)) |>
+  arrange(price_change) |>
+  head(10) |>
+  rename(
+    zip_code = region_name,
+    borough = county,
+    Jan_2020 = `2020_01_31`,
+    Jan_2021 = `2021_01_31`
+  ) |>
+  select(zip_code, borough, neighborhood, Jan_2020, Jan_2021, price_change, price_change_pct)
+
+cat("Top 10 ZIP codes with largest rental price drops from January 2020 to January 2021:\n")
+covid_rental |>
+  print()
+
+table <- covid_rental |>
+  mutate(
+    across(c(Jan_2020, Jan_2021, price_change), ~round(., 2)),
+    price_change_pct = round(price_change_pct, 2)
+  ) |>
+  rename(
+    "ZIP Code" = zip_code,
+    "Borough" = borough,
+    "Neighborhood" = neighborhood,
+    "Jan 2020" = Jan_2020,
+    "Jan 2021" = Jan_2021,
+    "Price Change" = price_change,
+    "Pct Change %" = price_change_pct
+  )
+
+options(tibble.width = Inf)
+table
+```
+
