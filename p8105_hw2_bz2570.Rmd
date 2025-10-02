@@ -94,12 +94,12 @@ After merging three datasets, the resulting dataset contains 822 observations mo
 
 ## Problem 2
 
-#### (1)
-Read and clean the Mr. Trash Wheel sheet
-1)specify the sheet in the Excel file and to omit non-data entries using arguments in read_excel
-2)use reasonable variable names
-3)omit rows that do not include dumpster-specific data
-4)round the number of sports balls to the nearest integer and converts the result to an integer variable (using as.integer)
+#### Read and clean the sheet
+Read and clean the Mr. Trash Wheel sheet<br>
+1)specify the sheet in the Excel file and to omit non-data entries using arguments in read_excel<br>
+2)use reasonable variable names<br>
+3)omit rows that do not include dumpster-specific data<br>
+4)round the number of sports balls to the nearest integer and converts the result to an integer variable (using as.integer)<br>
 ```{r}
 mr_tidy <- read_excel("./data/202509 Trash Wheel Collection Data.xlsx", 
                        sheet = "Mr. Trash Wheel",
@@ -113,9 +113,6 @@ mr_tidy <- read_excel("./data/202509 Trash Wheel Collection Data.xlsx",
   )
 
 ```
-
-#### (2)
-Use a similar process to import, clean, and organize the data for Professor Trash Wheel and Gwynnda, and combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset. To keep track of which Trash Wheel is which, you may need to add an additional variable to both datasets before combining.
 
 Read and clean Professor Trash Wheel data
 ```{r}
@@ -156,6 +153,7 @@ gwynnda_tidy <- gwynnda_tidy |>
 mr_tidy
 ```
 
+#### Combine datasets
 Combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset
 ```{r}
 combined_trash <- bind_rows(mr_tidy, professor_tidy, gwynnda_tidy) |> 
@@ -164,12 +162,12 @@ combined_trash <- bind_rows(mr_tidy, professor_tidy, gwynnda_tidy) |>
 combined_trash
 ```
 
-
 #### Write a paragraph about these data
 The resulting dataset combines trash collection data from three separate devices operating in Baltimore's Inner Harbor: Mr. Trash Wheel, Professor Trash Wheel, and Gwynns Falls Trash Wheel. The resulting dataset contains `r nrow(combined_trash)` observations tracking waste collection with `r ncol(combined_trash)` variables. Key variables include dumpster identification numbers, collection dates, total weight of trash, the number of some specific waste categories such as plastic bottles, polystyrene, cigarette butts, and the trash wheel identifier to track the source device.<br>(All the variables are:`r paste(names(combined_trash), collapse = ", ")`).<br> Based on the available data, the total weight of trash collected by Professor Trash Wheel is `r combined_trash |> filter(trash_wheel == "Professor Trash Wheel") |> summarise(total = sum(weight_tons, na.rm = TRUE)) |> pull(total)` tons. During June 2022, Gwynnda collected `r combined_trash |> filter(trash_wheel == "Gwynnda", year == 2022, month == "June") |> summarise(total = sum(cigarette_butts, na.rm = TRUE)) |> pull(total)` cigarette butts.
 
 
 ## Problem 3
+#### Import and clean
 Import and clean ZIP code dataset
 ```{r}
 zip_codes_tidy <- read_csv("./data/Zip Codes.csv",
@@ -201,6 +199,7 @@ zip_zori_tidy <- zip_zori |>
 zip_zori_tidy
 ```
 
+#### Merge
 Merge to create a single, final dataset
 ```{r}
 resulting_tidy_data <- zip_zori_tidy |>
@@ -288,3 +287,6 @@ options(tibble.width = Inf)
 table
 ```
 
+Comment<br>
+The data reveals a striking concentration of rental price declines in Manhattan during the COVID-19 pandemic, with all ten zip codes experiencing substantial percentage drops ranging from 14.4% to 22.4%. Particularly noteworthy is that Lower Manhattan areas (ZIP codes 10004, 10007, 10038) and the Lower East Side (10002, 10009) saw the most severe declines, with the largest percentage drop of 22.4% occurring in zip code 10004. This 
+pattern shows that the impact of the epidemic is most obvious in high-density urban cores and communities that rely heavily on office workers and tourism, because the reduction of urban activities has greatly shifted the housing demand in these core areas.
